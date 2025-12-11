@@ -3,4 +3,4 @@
 	url = https://github.com/iggyB/wdl-common-ugc.git
 [submodule "wiki"]
 	path = wiki
-	url = ../HiFi-human-WGS-WDL.wiki
+	url = https://github.com/PacificBiosciences/HiFi-human-WGS-WDL.wiki
