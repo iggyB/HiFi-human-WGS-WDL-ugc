@@ -23,9 +23,7 @@ workflow joint {
     gvcf_indices: {
       name: "GVCF Indices"
     }
-    discover_tars: {
-      name: "Sawfish discover output tarballs"
-    }
+
     aligned_bams: {
       name: "Aligned BAMs"
     }
@@ -41,12 +39,7 @@ workflow joint {
     default_runtime_attributes: {
       name: "Default Runtime Attribute Struct"
     }
-    split_joint_structural_variant_vcfs: {
-      name: "Joint-call structural variant VCF, split by sample"
-    }
-    split_joint_structural_variant_vcf_indices: {
-      name: "Joint-call structural variant VCF indices, split by sample"
-    }
+
     split_joint_small_variant_vcfs: {
       name: "Joint-call small variant VCF, split by sample"
     }
@@ -80,7 +73,7 @@ workflow joint {
     Array[File] gvcfs
     Array[File] gvcf_indices
 
-    Array[File] discover_tars
+
     Array[File] aligned_bams
     Array[File] aligned_bam_indices
 
@@ -93,48 +86,7 @@ workflow joint {
 
   Map[String, String] ref_map = read_map(ref_map_file)
 
-  scatter (sample_id in sample_ids) {
-    String copynum_bedgraph_name           = "~{sample_id}.~{family_id}.joint.~{ref_map['name']}.structural_variants.copynum.bedgraph"
-    String depth_bw_name                   = "~{sample_id}.~{family_id}.joint.~{ref_map['name']}.structural_variants.depth.bw"
-    String gc_bias_corrected_depth_bw_name = "~{sample_id}.~{family_id}.joint.~{ref_map['name']}.structural_variants.gc_bias_corrected_depth.bw"
-    String maf_bw_name                     = "~{sample_id}.~{family_id}.joint.~{ref_map['name']}.structural_variants.maf.bw"
-    String copynum_summary_name            = "~{sample_id}.~{family_id}.joint.~{ref_map['name']}.structural_variants.copynum.summary.json"
-  }
 
-  call Sawfish.sawfish_call {
-    input:
-      sample_ids                       = sample_ids,
-      discover_tars                    = discover_tars,
-      aligned_bams                     = aligned_bams,
-      aligned_bam_indices              = aligned_bam_indices,
-      ref_fasta                        = ref_map["fasta"],                                            # !FileCoercion
-      ref_index                        = ref_map["fasta_index"],                                      # !FileCoercion
-      out_prefix                       = "~{family_id}.joint.~{ref_map['name']}.structural_variants",
-      copynum_bedgraph_names           = copynum_bedgraph_name,
-      depth_bw_names                   = depth_bw_name,
-      gc_bias_corrected_depth_bw_names = gc_bias_corrected_depth_bw_name,
-      maf_bw_names                     = maf_bw_name,
-      copynum_summary_names            = copynum_summary_name,
-      runtime_attributes               = default_runtime_attributes
-  }
-
-  String sv_vcf_basename = basename(sawfish_call.vcf, ".vcf.gz")
-
-  scatter (sample_id in sample_ids) {
-    String split_sv_vcf_name = "~{sample_id}.~{sv_vcf_basename}.vcf.gz"
-    String split_sv_vcf_index_name = "~{sample_id}.~{sv_vcf_basename}.vcf.gz.tbi"
-  
-    call Bcftools.split_vcf_by_sample as split_sawfish {
-      input:
-        sample_id             = sample_id,
-        vcf                   = sawfish_call.vcf,
-        vcf_index             = sawfish_call.vcf_index,
-        split_vcf_name        = split_sv_vcf_name,
-        split_vcf_index_name  = split_sv_vcf_index_name,
-        exclude_uncalled      = false,
-        runtime_attributes    = default_runtime_attributes
-    }
-  }
 
   call Glnexus.glnexus {
     input:
@@ -164,15 +116,7 @@ workflow joint {
   }
 
   output {
-    Array[File] split_joint_structural_variant_vcfs        = split_sawfish.split_vcf
-    Array[File] split_joint_structural_variant_vcf_indices = split_sawfish.split_vcf_index
     Array[File] split_joint_small_variant_vcfs             = split_glnexus.split_vcf
     Array[File] split_joint_small_variant_vcf_indices      = split_glnexus.split_vcf_index
-    File sv_supporting_reads                               = select_first([sawfish_call.supporting_reads])
-    Array[File] sv_copynum_bedgraph                        = sawfish_call.copynum_bedgraph
-    Array[File] sv_depth_bw                                = sawfish_call.depth_bw
-    Array[File] sv_gc_bias_corrected_depth_bw              = sawfish_call.gc_bias_corrected_depth_bw
-    Array[File] sv_maf_bw                                  = sawfish_call.maf_bw
-    Array[File] sv_copynum_summary                         = sawfish_call.copynum_summary
   }
 }

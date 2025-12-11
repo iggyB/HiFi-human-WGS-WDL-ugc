@@ -47,9 +47,7 @@ workflow upstream {
     fail_reads_bait_index: {
       name: "Index of reference sequences for baiting fail reads; FASTA index"
     }
-    single_sample: {
-      name: "Single sample workflow"
-    }
+
     gpu: {
       name: "Use GPU for DeepVariant"
     }
@@ -72,8 +70,6 @@ workflow upstream {
     File? fail_reads_bed
     File? fail_reads_bait_fasta
     File? fail_reads_bait_index
-
-    Boolean single_sample = false
 
     Boolean gpu
 
@@ -242,37 +238,35 @@ workflow upstream {
       runtime_attributes = default_runtime_attributes
   }
 
-  if (single_sample) {
-    String copynum_bedgraph_name           = "~{sample_id}.~{ref_map['name']}.structural_variants.copynum.bedgraph"
-    String depth_bw_name                   = "~{sample_id}.~{ref_map['name']}.structural_variants.depth.bw"
-    String gc_bias_corrected_depth_bw_name = "~{sample_id}.~{ref_map['name']}.structural_variants.gc_bias_corrected_depth.bw"
-    String maf_bw_name                     = "~{sample_id}.~{ref_map['name']}.structural_variants.maf.bw"
-    String copynum_summary_name            = "~{sample_id}.~{ref_map['name']}.structural_variants.copynum.summary.json"
+  String copynum_bedgraph_name           = "~{sample_id}.~{ref_map['name']}.structural_variants.copynum.bedgraph"
+  String depth_bw_name                   = "~{sample_id}.~{ref_map['name']}.structural_variants.depth.bw"
+  String gc_bias_corrected_depth_bw_name = "~{sample_id}.~{ref_map['name']}.structural_variants.gc_bias_corrected_depth.bw"
+  String maf_bw_name                     = "~{sample_id}.~{ref_map['name']}.structural_variants.maf.bw"
+  String copynum_summary_name            = "~{sample_id}.~{ref_map['name']}.structural_variants.copynum.summary.json"
 
 
-    call Sawfish.sawfish_call {
-      input:
-        sample_ids                       = [sample_id],
-        discover_tars                    = [sawfish_discover.discover_tar],
-        aligned_bams                     = [aligned_bam_data],
-        aligned_bam_indices              = [aligned_bam_index],
-        ref_fasta                        = ref_map["fasta"],                                      # !FileCoercion
-        ref_index                        = ref_map["fasta_index"],                                # !FileCoercion
-        out_prefix                       = "~{sample_id}.~{ref_map['name']}.structural_variants",
-        copynum_bedgraph_names           = [copynum_bedgraph_name],
-        depth_bw_names                   = [depth_bw_name],
-        gc_bias_corrected_depth_bw_names = [gc_bias_corrected_depth_bw_name],
-        maf_bw_names                     = [maf_bw_name],
-        copynum_summary_names            = [copynum_summary_name],
-        runtime_attributes               = default_runtime_attributes
-    }
-
-    File copynum_bedgraph_output           = sawfish_call.copynum_bedgraph[0]
-    File depth_bw_output                   = sawfish_call.depth_bw[0]
-    File gc_bias_corrected_depth_bw_output = sawfish_call.gc_bias_corrected_depth_bw[0]
-    File maf_bw_output                     = sawfish_call.maf_bw[0]
-    File copynum_summary_output            = sawfish_call.copynum_summary[0]
+  call Sawfish.sawfish_call {
+    input:
+      sample_ids                       = [sample_id],
+      discover_tars                    = [sawfish_discover.discover_tar],
+      aligned_bams                     = [aligned_bam_data],
+      aligned_bam_indices              = [aligned_bam_index],
+      ref_fasta                        = ref_map["fasta"],                                      # !FileCoercion
+      ref_index                        = ref_map["fasta_index"],                                # !FileCoercion
+      out_prefix                       = "~{sample_id}.~{ref_map['name']}.structural_variants",
+      copynum_bedgraph_names           = [copynum_bedgraph_name],
+      depth_bw_names                   = [depth_bw_name],
+      gc_bias_corrected_depth_bw_names = [gc_bias_corrected_depth_bw_name],
+      maf_bw_names                     = [maf_bw_name],
+      copynum_summary_names            = [copynum_summary_name],
+      runtime_attributes               = default_runtime_attributes
   }
+
+  File copynum_bedgraph_output           = sawfish_call.copynum_bedgraph[0]
+  File depth_bw_output                   = sawfish_call.depth_bw[0]
+  File gc_bias_corrected_depth_bw_output = sawfish_call.gc_bias_corrected_depth_bw[0]
+  File maf_bw_output                     = sawfish_call.maf_bw[0]
+  File copynum_summary_output            = sawfish_call.copynum_summary[0]
 
   output {
     # alignments
@@ -291,14 +285,14 @@ workflow upstream {
     File discover_tar = sawfish_discover.discover_tar
 
     # sawfish outputs for single sample
-    File? sv_vcf                        = sawfish_call.vcf
-    File? sv_vcf_index                  = sawfish_call.vcf_index
-    File? sv_supporting_reads           = sawfish_call.supporting_reads
-    File? sv_copynum_bedgraph           = copynum_bedgraph_output
-    File? sv_depth_bw                   = depth_bw_output
-    File? sv_gc_bias_corrected_depth_bw = gc_bias_corrected_depth_bw_output
-    File? sv_maf_bw                     = maf_bw_output
-    File? sv_copynum_summary            = copynum_summary_output
+    File sv_vcf                        = sawfish_call.vcf
+    File sv_vcf_index                  = sawfish_call.vcf_index
+    File sv_supporting_reads           = sawfish_call.supporting_reads
+    File sv_copynum_bedgraph           = copynum_bedgraph_output
+    File sv_depth_bw                   = depth_bw_output
+    File sv_gc_bias_corrected_depth_bw = gc_bias_corrected_depth_bw_output
+    File sv_maf_bw                     = maf_bw_output
+    File sv_copynum_summary            = copynum_summary_output
 
     # small variant outputs
     File small_variant_vcf        = deepvariant.vcf

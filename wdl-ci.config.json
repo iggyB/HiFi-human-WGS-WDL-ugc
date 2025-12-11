@@ -1076,11 +1076,6 @@
             {
               "inputs": {
                 "sample_id": "HG002",
-                "vcfs": [
-                  "${resources_file_path}/hiphase/input/HG002/HG002.GRCh38.small_variants.vcf.gz",
-                  "${resources_file_path}/hiphase/input/HG002/HG002.GRCh38.pbsv.vcf.gz",
-                  "${resources_file_path}/hiphase/input/HG002/HG002.GRCh38.trgt.sorted.vcf.gz"
-                ],
                 "vcf_indices": [
                   "${resources_file_path}/hiphase/input/HG002/HG002.GRCh38.small_variants.vcf.gz.tbi",
                   "${resources_file_path}/hiphase/input/HG002/HG002.GRCh38.pbsv.vcf.gz.tbi",
@@ -1104,18 +1099,6 @@
                 "runtime_attributes": "${default_runtime_attributes}"
               },
               "output_tests": {
-                "phased_vcfs": {
-                  "value": [
-                    "${resources_file_path}/hiphase/output/HG002/HG002.GRCh38.small_variants.phased.vcf.gz",
-                    "${resources_file_path}/hiphase/output/HG002/HG002.GRCh38.pbsv.phased.vcf.gz",
-                    "${resources_file_path}/hiphase/output/HG002/HG002.GRCh38.trgt.sorted.phased.vcf.gz"
-                  ],
-                  "test_tasks": [
-                    "compare_file_basename",
-                    "vcftools_validator",
-                    "check_gzip"
-                  ]
-                },
                 "haplotagged_bam": {
                   "value": "${resources_file_path}/hiphase/output/HG002/HG002.GRCh38.haplotagged.bam",
                   "test_tasks": [
@@ -1147,6 +1130,22 @@
                     "count_columns",
                     "check_gzip"
                   ]
+                },
+                "phased_sv_vcf": {
+                  "value": "${resources_file_path}/hiphase/output/HG002/HG002.GRCh38.pbsv.phased.vcf.gz",
+                  "test_tasks": [
+                    "compare_file_basename",
+                    "vcftools_validator",
+                    "check_gzip"
+                  ]
+                },
+                "phased_trgt_vcf": {
+                  "value": "${resources_file_path}/hiphase/output/HG002/HG002.GRCh38.trgt.sorted.phased.vcf.gz",
+                  "test_tasks": [
+                    "compare_file_basename",
+                    "vcftools_validator",
+                    "check_gzip"
+                  ]
                 }
               }
             }
@@ -1169,7 +1168,6 @@
                 "ref_name": "${ref_name}",
                 "aligned_bam": "${resources_file_path}/pbmm2_align_wgs/vega_10k/HG002.vega_10k.hifi_reads.GRCh38.aligned.bam",
                 "aligned_bam_index": "${resources_file_path}/pbmm2_align_wgs/vega_10k/HG002.vega_10k.hifi_reads.GRCh38.aligned.bam.bai",
-                "infer_sex": true,
                 "runtime_attributes": "${default_runtime_attributes}"
               },
               "output_tests": {
