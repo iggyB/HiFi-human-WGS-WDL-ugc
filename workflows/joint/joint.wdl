@@ -123,17 +123,17 @@ workflow joint {
   scatter (sample_id in sample_ids) {
     String split_sv_vcf_name = "~{sample_id}.~{sv_vcf_basename}.vcf.gz"
     String split_sv_vcf_index_name = "~{sample_id}.~{sv_vcf_basename}.vcf.gz.tbi"
-  }
-
-  call Bcftools.split_vcf_by_sample as split_sawfish {
-    input:
-      sample_ids            = sample_ids,
-      vcf                   = sawfish_call.vcf,
-      vcf_index             = sawfish_call.vcf_index,
-      split_vcf_names       = split_sv_vcf_name,
-      split_vcf_index_names = split_sv_vcf_index_name,
-      exclude_uncalled      = false,
-      runtime_attributes    = default_runtime_attributes
+  
+    call Bcftools.split_vcf_by_sample as split_sawfish {
+      input:
+        sample_id             = sample_id,
+        vcf                   = sawfish_call.vcf,
+        vcf_index             = sawfish_call.vcf_index,
+        split_vcf_name        = split_sv_vcf_name,
+        split_vcf_index_name  = split_sv_vcf_index_name,
+        exclude_uncalled      = false,
+        runtime_attributes    = default_runtime_attributes
+    }
   }
 
   call Glnexus.glnexus {
@@ -151,23 +151,23 @@ workflow joint {
   scatter (sample_id in sample_ids) {
     String split_glnexus_vcf_name = "~{sample_id}.~{glnexus_vcf_basename}.vcf.gz"
     String split_glnexus_vcf_index_name = "~{sample_id}.~{glnexus_vcf_basename}.vcf.gz.tbi"
-  }
-
-  call Bcftools.split_vcf_by_sample as split_glnexus {
-    input:
-      sample_ids            = sample_ids,
-      vcf                   = glnexus.vcf,
-      vcf_index             = glnexus.vcf_index,
-      split_vcf_names       = split_glnexus_vcf_name,
-      split_vcf_index_names = split_glnexus_vcf_index_name,
-      runtime_attributes    = default_runtime_attributes
+  
+    call Bcftools.split_vcf_by_sample as split_glnexus {
+      input:
+        sample_id             = sample_id,
+        vcf                   = glnexus.vcf,
+        vcf_index             = glnexus.vcf_index,
+        split_vcf_name        = split_glnexus_vcf_name,
+        split_vcf_index_name  = split_glnexus_vcf_index_name,
+        runtime_attributes    = default_runtime_attributes
+    }
   }
 
   output {
-    Array[File] split_joint_structural_variant_vcfs        = split_sawfish.split_vcfs
-    Array[File] split_joint_structural_variant_vcf_indices = split_sawfish.split_vcf_indices
-    Array[File] split_joint_small_variant_vcfs             = split_glnexus.split_vcfs
-    Array[File] split_joint_small_variant_vcf_indices      = split_glnexus.split_vcf_indices
+    Array[File] split_joint_structural_variant_vcfs        = split_sawfish.split_vcf
+    Array[File] split_joint_structural_variant_vcf_indices = split_sawfish.split_vcf_index
+    Array[File] split_joint_small_variant_vcfs             = split_glnexus.split_vcf
+    Array[File] split_joint_small_variant_vcf_indices      = split_glnexus.split_vcf_index
     File sv_supporting_reads                               = select_first([sawfish_call.supporting_reads])
     Array[File] sv_copynum_bedgraph                        = sawfish_call.copynum_bedgraph
     Array[File] sv_depth_bw                                = sawfish_call.depth_bw
